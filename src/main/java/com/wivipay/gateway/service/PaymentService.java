@@ -17,6 +17,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class PaymentService {
 
     private final List<PaymentProvider> providers;

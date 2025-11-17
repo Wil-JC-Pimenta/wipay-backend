@@ -5,6 +5,7 @@ import com.wivipay.gateway.dto.PaymentResponse;
 import com.wivipay.gateway.model.PaymentTransaction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -43,6 +44,7 @@ public class PayPalProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings("null")
     public PaymentResponse authorize(PaymentRequest request) {
         try {
             String token = getAccessToken();
@@ -75,14 +77,17 @@ public class PayPalProvider implements PaymentProvider {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/v2/checkout/orders",
                 HttpMethod.POST,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API PayPal");
+            }
 
             PaymentResponse paymentResponse = new PaymentResponse();
             paymentResponse.setProvider("paypal");
@@ -100,7 +105,7 @@ public class PayPalProvider implements PaymentProvider {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "null"})
     public PaymentResponse capture(String transactionId) {
         try {
             String token = getAccessToken();
@@ -111,15 +116,21 @@ public class PayPalProvider implements PaymentProvider {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/v2/checkout/orders/" + transactionId + "/capture",
                 HttpMethod.POST,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API PayPal");
+            }
             List<Map<String, Object>> purchaseUnits = (List<Map<String, Object>>) responseBody.get("purchase_units");
+            if (purchaseUnits == null || purchaseUnits.isEmpty()) {
+                throw new RuntimeException("Resposta inválida da API PayPal: purchase_units vazio");
+            }
             Map<String, Object> amount = (Map<String, Object>) purchaseUnits.get(0).get("amount");
 
             PaymentResponse paymentResponse = new PaymentResponse();
@@ -137,6 +148,7 @@ public class PayPalProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings("null")
     public PaymentResponse refund(String transactionId, BigDecimal amount) {
         try {
             String token = getAccessToken();
@@ -154,14 +166,17 @@ public class PayPalProvider implements PaymentProvider {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/v2/payments/captures/" + transactionId + "/refund",
                 HttpMethod.POST,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API PayPal");
+            }
 
             PaymentResponse paymentResponse = new PaymentResponse();
             paymentResponse.setProvider("paypal");
@@ -182,6 +197,7 @@ public class PayPalProvider implements PaymentProvider {
         return "paypal".equalsIgnoreCase(providerName);
     }
 
+    @SuppressWarnings("null")
     private String getAccessToken() {
         if (accessToken != null) {
             return accessToken;
@@ -196,14 +212,17 @@ public class PayPalProvider implements PaymentProvider {
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
             apiUrl + "/v1/oauth2/token",
             HttpMethod.POST,
             entity,
-            Map.class
+            new ParameterizedTypeReference<Map<String, Object>>() {}
         );
 
         Map<String, Object> responseBody = response.getBody();
+        if (responseBody == null) {
+            throw new RuntimeException("Resposta vazia da API PayPal ao obter token");
+        }
         accessToken = responseBody.get("access_token").toString();
 
         return accessToken;

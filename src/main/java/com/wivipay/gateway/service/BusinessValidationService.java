@@ -19,6 +19,7 @@ import java.util.List;
 public class BusinessValidationService {
     
     private final CustomerRepository customerRepository;
+    @SuppressWarnings("unused")
     private final CreditCardRepository creditCardRepository;
     
     // Moedas suportadas por provedor

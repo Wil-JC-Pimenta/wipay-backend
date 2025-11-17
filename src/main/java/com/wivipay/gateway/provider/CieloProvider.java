@@ -5,6 +5,7 @@ import com.wivipay.gateway.dto.PaymentResponse;
 import com.wivipay.gateway.model.PaymentTransaction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -42,6 +43,7 @@ public class CieloProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "null"})
     public PaymentResponse authorize(PaymentRequest request) {
         try {
             Map<String, Object> payload = new HashMap<>();
@@ -61,14 +63,17 @@ public class CieloProvider implements PaymentProvider {
             HttpHeaders headers = createHeaders();
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/1/sales",
                 HttpMethod.POST,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API Cielo");
+            }
             Map<String, Object> payment = (Map<String, Object>) responseBody.get("Payment");
 
             PaymentResponse paymentResponse = new PaymentResponse();
@@ -87,19 +92,23 @@ public class CieloProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "null"})
     public PaymentResponse capture(String transactionId) {
         try {
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/1/sales/" + transactionId + "/capture",
                 HttpMethod.PUT,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API Cielo");
+            }
             Map<String, Object> payment = (Map<String, Object>) responseBody.get("Payment");
 
             PaymentResponse paymentResponse = new PaymentResponse();
@@ -117,19 +126,24 @@ public class CieloProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "null"})
     public PaymentResponse refund(String transactionId, BigDecimal amount) {
         try {
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 apiUrl + "/1/sales/" + transactionId + "/void?amount=" + amount.multiply(BigDecimal.valueOf(100)).intValue(),
                 HttpMethod.PUT,
                 entity,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             Map<String, Object> responseBody = response.getBody();
+            if (responseBody == null) {
+                throw new RuntimeException("Resposta vazia da API Cielo");
+            }
+            @SuppressWarnings("unused")
             Map<String, Object> payment = (Map<String, Object>) responseBody.get("Payment");
 
             PaymentResponse paymentResponse = new PaymentResponse();

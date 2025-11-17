@@ -16,9 +16,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class CustomerService {
     
     private final CustomerRepository repository;
+    @SuppressWarnings("unused")
     private final BusinessValidationService businessValidationService;
     
     @Transactional

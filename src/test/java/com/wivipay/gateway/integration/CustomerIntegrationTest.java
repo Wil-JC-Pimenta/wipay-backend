@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@SuppressWarnings("null")
 class CustomerIntegrationTest {
 
     @Container
@@ -112,7 +113,7 @@ class CustomerIntegrationTest {
     @Test
     @WithMockUser(authorities = "SCOPE_customers:read")
     void shouldGetCustomerByExternalIdSuccessfully() throws Exception {
-        Customer customer = repository.save(request.toCustomer());
+        repository.save(request.toCustomer());
 
         mockMvc.perform(get("/customers/external/{externalId}", "CLI001"))
                 .andExpect(status().isOk())
