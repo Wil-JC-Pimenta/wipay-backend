@@ -3,7 +3,7 @@
 # Script para configurar o Keycloak com as novas roles e permissões
 # Execute este script após o Keycloak estar rodando
 
-echo "🚀 Configurando Keycloak para WiviPay Gateway..."
+echo "Configurando Keycloak para WiviPay Gateway..."
 
 # Variáveis de configuração
 KEYCLOAK_URL="http://localhost:8180"
@@ -14,28 +14,28 @@ CLIENT_ID="gateway-client"
 CLIENT_SECRET="gateway-secret-key-2024"
 
 # Aguardar o Keycloak estar disponível
-echo "⏳ Aguardando Keycloak estar disponível..."
+echo "Aguardando Keycloak estar disponível..."
 until curl -s "$KEYCLOAK_URL/health" > /dev/null 2>&1; do
     echo "   Aguardando..."
     sleep 5
 done
-echo "✅ Keycloak está disponível!"
+echo "Keycloak está disponível!"
 
 # Obter token de admin
-echo "🔑 Obtendo token de administrador..."
+echo "Obtendo token de administrador..."
 ADMIN_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL/realms/master/protocol/openid-connect/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "grant_type=password&client_id=admin-cli&username=$ADMIN_USERNAME&password=$ADMIN_PASSWORD" \
     | jq -r '.access_token')
 
 if [ "$ADMIN_TOKEN" = "null" ] || [ -z "$ADMIN_TOKEN" ]; then
-    echo "❌ Erro ao obter token de admin. Verifique as credenciais."
+    echo "Erro ao obter token de admin. Verifique as credenciais."
     exit 1
 fi
-echo "✅ Token de admin obtido!"
+echo "Token de admin obtido!"
 
 # Criar realm se não existir
-echo "🏗️ Criando realm '$REALM'..."
+echo "Criando realm '$REALM'..."
 curl -s -X POST "$KEYCLOAK_URL/admin/realms" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -47,13 +47,13 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms" \
     }" > /dev/null
 
 if [ $? -eq 0 ]; then
-    echo "✅ Realm '$REALM' criado!"
+    echo "Realm '$REALM' criado!"
 else
-    echo "ℹ️ Realm '$REALM' já existe ou erro na criação."
+    echo "Realm '$REALM' já existe ou erro na criação."
 fi
 
 # Criar cliente
-echo "🔐 Criando cliente '$CLIENT_ID'..."
+echo "Criando cliente '$CLIENT_ID'..."
 curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -80,25 +80,25 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/clients" \
     }" > /dev/null
 
 if [ $? -eq 0 ]; then
-    echo "✅ Cliente '$CLIENT_ID' criado!"
+    echo "Cliente '$CLIENT_ID' criado!"
 else
-    echo "ℹ️ Cliente '$CLIENT_ID' já existe ou erro na criação."
+    echo "Cliente '$CLIENT_ID' já existe ou erro na criação."
 fi
 
 # Obter ID do cliente
-echo "🔍 Obtendo ID do cliente..."
+echo "Obtendo ID do cliente..."
 CLIENT_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/clients?clientId=$CLIENT_ID" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     | jq -r '.[0].id')
 
 if [ "$CLIENT_UUID" = "null" ] || [ -z "$CLIENT_UUID" ]; then
-    echo "❌ Erro ao obter ID do cliente."
+    echo "Erro ao obter ID do cliente."
     exit 1
 fi
-echo "✅ ID do cliente: $CLIENT_UUID"
+echo "ID do cliente: $CLIENT_UUID"
 
 # Criar roles do cliente
-echo "👥 Criando roles do cliente..."
+echo "Criando roles do cliente..."
 
 # Array de roles
 declare -a ROLES=(
@@ -124,14 +124,14 @@ for role in "${ROLES[@]}"; do
         }" > /dev/null
     
     if [ $? -eq 0 ]; then
-        echo "     ✅ Role '$roleName' criada!"
+        echo "     Role '$roleName' criada!"
     else
-        echo "     ℹ️ Role '$roleName' já existe ou erro na criação."
+        echo "     Role '$roleName' já existe ou erro na criação."
     fi
 done
 
 # Criar usuário admin
-echo "👤 Criando usuário admin..."
+echo "Criando usuário admin..."
 curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -152,25 +152,25 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
     }" > /dev/null
 
 if [ $? -eq 0 ]; then
-    echo "✅ Usuário admin criado!"
+    echo "Usuário admin criado!"
 else
-    echo "ℹ️ Usuário admin já existe ou erro na criação."
+    echo "Usuário admin já existe ou erro na criação."
 fi
 
 # Obter ID do usuário admin
-echo "🔍 Obtendo ID do usuário admin..."
+echo "Obtendo ID do usuário admin..."
 ADMIN_USER_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/users?username=admin" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     | jq -r '.[0].id')
 
 if [ "$ADMIN_USER_UUID" = "null" ] || [ -z "$ADMIN_USER_UUID" ]; then
-    echo "❌ Erro ao obter ID do usuário admin."
+    echo "Erro ao obter ID do usuário admin."
     exit 1
 fi
-echo "✅ ID do usuário admin: $ADMIN_USER_UUID"
+echo "ID do usuário admin: $ADMIN_USER_UUID"
 
 # Atribuir roles ao usuário admin
-echo "🔑 Atribuindo roles ao usuário admin..."
+echo "Atribuindo roles ao usuário admin..."
 
 # Obter todas as roles do cliente
 CLIENT_ROLES=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/clients/$CLIENT_UUID/roles" \
@@ -192,14 +192,14 @@ for roleName in $CLIENT_ROLES; do
         -d "[$ROLE_REPRESENTATION]" > /dev/null
     
     if [ $? -eq 0 ]; then
-        echo "     ✅ Role '$roleName' atribuída!"
+        echo "     Role '$roleName' atribuída!"
     else
-        echo "     ℹ️ Role '$roleName' já atribuída ou erro na atribuição."
+        echo "     Role '$roleName' já atribuída ou erro na atribuição."
     fi
 done
 
 # Criar usuário regular
-echo "👤 Criando usuário regular..."
+echo "Criando usuário regular..."
 curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     -H "Content-Type: application/json" \
@@ -220,25 +220,25 @@ curl -s -X POST "$KEYCLOAK_URL/admin/realms/$REALM/users" \
     }" > /dev/null
 
 if [ $? -eq 0 ]; then
-    echo "✅ Usuário regular criado!"
+    echo "Usuário regular criado!"
 else
-    echo "ℹ️ Usuário regular já existe ou erro na criação."
+    echo "Usuário regular já existe ou erro na criação."
 fi
 
 # Obter ID do usuário regular
-echo "🔍 Obtendo ID do usuário regular..."
+echo "Obtendo ID do usuário regular..."
 USER_UUID=$(curl -s -X GET "$KEYCLOAK_URL/admin/realms/$REALM/users?username=user" \
     -H "Authorization: Bearer $ADMIN_TOKEN" \
     | jq -r '.[0].id')
 
 if [ "$USER_UUID" = "null" ] || [ -z "$USER_UUID" ]; then
-    echo "❌ Erro ao obter ID do usuário regular."
+    echo "Erro ao obter ID do usuário regular."
     exit 1
 fi
-echo "✅ ID do usuário regular: $USER_UUID"
+echo "ID do usuário regular: $USER_UUID"
 
 # Atribuir roles de leitura ao usuário regular
-echo "🔑 Atribuindo roles de leitura ao usuário regular..."
+echo "Atribuindo roles de leitura ao usuário regular..."
 READ_ROLES=("payments:read" "customers:read" "credit_cards:read")
 
 for roleName in "${READ_ROLES[@]}"; do
@@ -255,28 +255,28 @@ for roleName in "${READ_ROLES[@]}"; do
         -d "[$ROLE_REPRESENTATION]" > /dev/null
     
     if [ $? -eq 0 ]; then
-        echo "     ✅ Role '$roleName' atribuída!"
+        echo "     Role '$roleName' atribuída!"
     else
-        echo "     ℹ️ Role '$roleName' já atribuída ou erro na atribuição."
+        echo "     Role '$roleName' já atribuída ou erro na atribuição."
     fi
 done
 
 echo ""
-echo "🎉 Configuração do Keycloak concluída!"
+echo "Configuração do Keycloak concluída!"
 echo ""
-echo "📋 Resumo da configuração:"
+echo "Resumo da configuração:"
 echo "   Realm: $REALM"
 echo "   Cliente: $CLIENT_ID"
 echo "   Secret: $CLIENT_SECRET"
 echo "   URL: $KEYCLOAK_URL"
 echo ""
-echo "👥 Usuários criados:"
+echo "Usuários criados:"
 echo "   admin/admin (todas as permissões)"
 echo "   user/user123 (apenas leitura)"
 echo ""
-echo "🔑 Para obter token de acesso:"
+echo "Para obter token de acesso:"
 echo "   curl -X POST $KEYCLOAK_URL/realms/$REALM/protocol/openid-connect/token \\"
 echo "     -H \"Content-Type: application/x-www-form-urlencoded\" \\"
 echo "     -d \"grant_type=password&client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&username=admin&password=admin\""
 echo ""
-echo "🌐 Acesse o console admin em: $KEYCLOAK_URL"
+echo "Acesse o console admin em: $KEYCLOAK_URL"

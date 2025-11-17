@@ -100,6 +100,7 @@ public class PayPalProvider implements PaymentProvider {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public PaymentResponse capture(String transactionId) {
         try {
             String token = getAccessToken();
