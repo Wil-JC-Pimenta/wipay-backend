@@ -1072,7 +1072,7 @@ chore: tarefas de manutenção
 
 ## Changelog
 
-### v1.0.0 (Janeiro 2025)
+### v1.0.0 (Novembro 2025)
 
 - Sistema de pagamentos completo implementado
 - Gestão de clientes e cartões de crédito
@@ -1089,5 +1089,6 @@ chore: tarefas de manutenção
 
 ---
 
-**Última atualização**: Janeiro de 2025  
+**Última atualização**: Novembro de 2025  
 **Status**: Em Desenvolvimento
+
